@@ -4,10 +4,12 @@ body, html {
   height: 100%;
   font-family: sans-serif;
 }
+
 #map {
-  height: calc(100vh - 50px);
+  height: calc(100vh - 50px); /* hace visible el mapa debajo de los filtros */
   width: 100%;
 }
+
 .filters {
   display: flex;
   gap: 8px;
@@ -16,9 +18,4 @@ body, html {
   position: sticky;
   top: 0;
   z-index: 999;
-}
-select {
-  flex: 1;
-  padding: 8px;
-  font-size: 16px;
 }
