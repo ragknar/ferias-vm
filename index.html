@@ -35,81 +35,83 @@
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
   <script>
-    const ferias = [
-      {
-        nombre: "Feria El Belloto",
-        comuna: "Quilpué",
-        lat: -33.0425,
-        lng: -71.42,
-        dias: ["Lunes", "Jueves"],
-        horario: "9:00 - 15:00"
-      },
-      {
-        nombre: "Feria Achupallas",
-        comuna: "Viña del Mar",
-        lat: -33.0301,
-        lng: -71.5308,
-        dias: ["Miércoles", "Sábado"],
-        horario: "8:00 - 14:00"
-      },
-      {
-        nombre: "Feria Villa Alemana Centro",
-        comuna: "Villa Alemana",
-        lat: -33.0427,
-        lng: -71.3729,
-        dias: ["Martes", "Viernes"],
-        horario: "8:30 - 14:30"
-      },
-      {
-        nombre: "Feria Placilla",
-        comuna: "Valparaíso",
-        lat: -33.0667,
-        lng: -71.6333,
-        dias: ["Domingo"],
-        horario: "9:00 - 15:00"
+    document.addEventListener("DOMContentLoaded", () => {
+      const ferias = [
+        {
+          nombre: "Feria El Belloto",
+          comuna: "Quilpué",
+          lat: -33.0425,
+          lng: -71.42,
+          dias: ["Lunes", "Jueves"],
+          horario: "9:00 - 15:00"
+        },
+        {
+          nombre: "Feria Achupallas",
+          comuna: "Viña del Mar",
+          lat: -33.0301,
+          lng: -71.5308,
+          dias: ["Miércoles", "Sábado"],
+          horario: "8:00 - 14:00"
+        },
+        {
+          nombre: "Feria Villa Alemana Centro",
+          comuna: "Villa Alemana",
+          lat: -33.0427,
+          lng: -71.3729,
+          dias: ["Martes", "Viernes"],
+          horario: "8:30 - 14:30"
+        },
+        {
+          nombre: "Feria Placilla",
+          comuna: "Valparaíso",
+          lat: -33.0667,
+          lng: -71.6333,
+          dias: ["Domingo"],
+          horario: "9:00 - 15:00"
+        }
+      ];
+
+      const map = L.map('map').setView([-33.05, -71.4], 11);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      let markers = [];
+
+      function renderFerias() {
+        const comuna = document.getElementById('comunaFilter').value;
+        const dia = document.getElementById('diaFilter').value;
+
+        markers.forEach(marker => map.removeLayer(marker));
+        markers = [];
+
+        ferias
+          .filter(f => comuna === 'todas' || f.comuna === comuna)
+          .filter(f => dia === 'todos' || f.dias.includes(dia))
+          .forEach(f => {
+            const marker = L.marker([f.lat, f.lng])
+              .addTo(map)
+              .bindPopup(`<strong>${f.nombre}</strong><br>${f.comuna}<br>Días: ${f.dias.join(", ")}<br>Horario: ${f.horario}`);
+            markers.push(marker);
+          });
       }
-    ];
 
-    const map = L.map('map').setView([-33.05, -71.4], 11);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
+      document.getElementById('comunaFilter').addEventListener('change', renderFerias);
+      document.getElementById('diaFilter').addEventListener('change', renderFerias);
 
-    let markers = [];
+      renderFerias();
 
-    function renderFerias() {
-      const comuna = document.getElementById('comunaFilter').value;
-      const dia = document.getElementById('diaFilter').value;
+      map.locate({ setView: false, maxZoom: 14 });
+      map.on('locationfound', e => {
+        L.marker(e.latlng).addTo(map).bindPopup("Estás aquí").openPopup();
+      });
 
-      markers.forEach(m => map.removeLayer(m));
-      markers = [];
-
-      ferias
-        .filter(f => (comuna === "todas" || f.comuna === comuna))
-        .filter(f => (dia === "todos" || f.dias.includes(dia)))
-        .forEach(f => {
-          const marker = L.marker([f.lat, f.lng])
-            .bindPopup(`<strong>${f.nombre}</strong><br>${f.comuna}<br>Días: ${f.dias.join(", ")}<br>Horario: ${f.horario}`)
-            .addTo(map);
-          markers.push(marker);
-        });
-    }
-
-    document.getElementById("comunaFilter").addEventListener("change", renderFerias);
-    document.getElementById("diaFilter").addEventListener("change", renderFerias);
-    renderFerias();
-
-    map.locate({ setView: false, maxZoom: 14 });
-    map.on('locationfound', e => {
-      L.marker(e.latlng).addTo(map).bindPopup("Estás aquí").openPopup();
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js');
+      }
     });
-
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('Service Worker registrado', reg))
-        .catch(err => console.error('Error al registrar SW:', err));
-    }
   </script>
 
 </body>
